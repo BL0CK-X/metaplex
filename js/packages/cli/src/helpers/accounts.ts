@@ -280,7 +280,7 @@ export function loadWalletKey(keypair): Keypair {
 
 export async function loadCandyProgram(walletKeyPair: Keypair, env: string) {
   // @ts-ignore
-  const solConnection = new web3.Connection(web3.clusterApiUrl(env));
+  const solConnection = new web3.Connection(env);
   const walletWrapper = new anchor.Wallet(walletKeyPair);
   const provider = new anchor.Provider(solConnection, walletWrapper, {
     preflightCommitment: 'recent',
