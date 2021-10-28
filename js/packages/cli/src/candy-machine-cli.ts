@@ -31,6 +31,7 @@ import { verifyTokenMetadata } from './commands/verifyTokenMetadata';
 import { generateConfigurations } from './commands/generateConfigurations';
 import { loadCache, saveCache } from './helpers/cache';
 import { mint } from './commands/mint';
+import { getCandyMachineData } from './commands/getCandyMachineData';
 import { signMetadata } from './commands/sign';
 import { signAllMetadataFromCandyMachine } from './commands/signAll';
 import log from 'loglevel';
@@ -644,6 +645,30 @@ programCommand('mint_one_token').action(async (directory, cmd) => {
   const tx = await mint(keypair, env, new PublicKey(configAddress));
 
   log.info('mint_one_token finished', tx);
+});
+
+programCommand('get_candy_machine_data').action(async (directory, cmd) => {
+  const { keypair, env, cacheName, configAddress } = cmd.opts();
+
+  console.log(cacheName);
+  // const cacheContent = loadCache(cacheName, env);
+  // const configAddress = new PublicKey(cacheContent.program.config);
+  const data = await getCandyMachineData(
+    keypair,
+    env,
+    new PublicKey(configAddress),
+  );
+
+  // console.log((data as any).price)
+  // console.log((data as any).price.toNumber());
+  // console.log((data as any).goLiveDate.toNumber());
+  // console.log((data as any).itemsAvailable.toNumber());
+
+  log.info('get_candy_machine_data finished', {
+    price: (data as any).price.toNumber(),
+    goLiveDate: (data as any).goLiveDate.toNumber(),
+    itemsAvailable: (data as any).itemsAvailable.toNumber(),
+  });
 });
 
 programCommand('sign')
