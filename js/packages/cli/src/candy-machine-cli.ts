@@ -664,11 +664,14 @@ programCommand('get_candy_machine_data').action(async (directory, cmd) => {
   // console.log((data as any).goLiveDate.toNumber());
   // console.log((data as any).itemsAvailable.toNumber());
 
-  log.info('get_candy_machine_data finished', {
-    price: (data as any).price.toNumber(),
-    goLiveDate: (data as any).goLiveDate.toNumber(),
-    itemsAvailable: (data as any).itemsAvailable.toNumber(),
-  });
+  log.info(
+    'get_candy_machine_data finished',
+    JSON.stringify({
+      price: (data as any).price.toNumber(),
+      goLiveDate: (data as any).goLiveDate.toNumber(),
+      itemsAvailable: (data as any).itemsAvailable.toNumber(),
+    }),
+  );
 });
 
 programCommand('sign')
