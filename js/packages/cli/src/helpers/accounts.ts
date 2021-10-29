@@ -289,6 +289,9 @@ export async function loadCandyProgram(walletKeyPair: Keypair, env: string) {
 
   const program = new anchor.Program(idl, CANDY_MACHINE_PROGRAM_ID, provider);
   log.debug('program id from anchor', program.programId.toBase58());
+  // console.log(program.transaction)
+  // console.log(program.programId);
+  // console.log(program.account.candyMachineConfigs ????)
   return program;
 }
 

@@ -31,7 +31,7 @@ import { verifyTokenMetadata } from './commands/verifyTokenMetadata';
 import { generateConfigurations } from './commands/generateConfigurations';
 import { loadCache, saveCache } from './helpers/cache';
 import { mint } from './commands/mint';
-import { getCandyMachineData } from './commands/getCandyMachineData';
+// import { getCandyMachineData } from './commands/getCandyMachineData';
 import { signMetadata } from './commands/sign';
 import { signAllMetadataFromCandyMachine } from './commands/signAll';
 import log from 'loglevel';
@@ -348,12 +348,67 @@ programCommand('verify').action(async (directory, cmd) => {
   saveCache(cacheName, env, cacheContent);
 });
 
+programCommand('get_candy_machine_config_id')
+  .option('-i, --candy-machine-id <string>')
+  .action(async (directory, cmd) => {
+    const { keypair, env, candyMachineId } = cmd.opts();
+
+    const walletKeyPair = loadWalletKey(keypair);
+    const anchorProgram = await loadCandyProgram(walletKeyPair, env);
+    const machine = await anchorProgram.account.candyMachine.fetch(
+      new PublicKey(candyMachineId),
+    );
+    console.log(
+      'get_candy_machine_config_id finished',
+      (machine as any).config.toBase58(),
+    );
+  });
+
+programCommand('get_candy_machine_data')
+  .option('-i, --candy-machine-id <string>')
+  .action(async (directory, cmd) => {
+    const { keypair, env, candyMachineId } = cmd.opts();
+
+    const walletKeyPair = loadWalletKey(keypair);
+    const anchorProgram = await loadCandyProgram(walletKeyPair, env);
+
+    console.log(candyMachineId);
+    const machine = await anchorProgram.account.candyMachine.fetch(
+      new PublicKey(candyMachineId),
+    );
+
+    const data = (machine as any).data;
+
+    console.log(
+      'get_candy_machine_data finished',
+      JSON.stringify({
+        uuid: (data as any).uuid,
+        price: (data as any).price.toNumber(),
+        goLiveDate: (data as any).goLiveDate.toNumber(),
+        itemsAvailable: (data as any).itemsAvailable.toNumber(),
+      }),
+    );
+  });
+
 programCommand('verify_price')
   .option('-p, --price <string>')
   .option('--cache-path <string>')
   .action(async (directory, cmd) => {
     const { keypair, env, price, cacheName, cachePath } = cmd.opts();
     const lamports = parsePrice(price);
+
+    // ////////////----
+    const walletKeyPairr = loadWalletKey(keypair);
+    const anchorProgramm = await loadCandyProgram(walletKeyPairr, env);
+    const machinee = await anchorProgramm.account.candyMachine.fetch(
+      new PublicKey('F9yJ4ZFBBcUSJPc9skVw8CXHL5eRbnaqenjQUPQa83Qe'),
+    );
+    console.log((machinee as any).data);
+    // const machineee = await anchorProgramm.account.config.fetch(
+    //   new PublicKey("F9yJ4ZFBBcUSJPc9skVw8CXHL5eRbnaqenjQUPQa83Qe"),
+    // );
+    console.log((machinee as any).config.toBase58());
+    // ////////////----
 
     if (isNaN(lamports)) {
       return log.error(`verify_price requires a --price to be set`);
@@ -647,32 +702,32 @@ programCommand('mint_one_token').action(async (directory, cmd) => {
   log.info('mint_one_token finished', tx);
 });
 
-programCommand('get_candy_machine_data').action(async (directory, cmd) => {
-  const { keypair, env, cacheName, configAddress } = cmd.opts();
+// programCommand('get_candy_machine_data').action(async (directory, cmd) => {
+//   const { keypair, env, cacheName, configAddress } = cmd.opts();
 
-  console.log(cacheName);
-  // const cacheContent = loadCache(cacheName, env);
-  // const configAddress = new PublicKey(cacheContent.program.config);
-  const data = await getCandyMachineData(
-    keypair,
-    env,
-    new PublicKey(configAddress),
-  );
+//   console.log(cacheName);
+//   // const cacheContent = loadCache(cacheName, env);
+//   // const configAddress = new PublicKey(cacheContent.program.config);
+//   const data = await getCandyMachineData(
+//     keypair,
+//     env,
+//     new PublicKey(configAddress),
+//   );
 
-  // console.log((data as any).price)
-  // console.log((data as any).price.toNumber());
-  // console.log((data as any).goLiveDate.toNumber());
-  // console.log((data as any).itemsAvailable.toNumber());
+//   // console.log((data as any).price)
+//   // console.log((data as any).price.toNumber());
+//   // console.log((data as any).goLiveDate.toNumber());
+//   // console.log((data as any).itemsAvailable.toNumber());
 
-  log.info(
-    'get_candy_machine_data finished',
-    JSON.stringify({
-      price: (data as any).price.toNumber(),
-      goLiveDate: (data as any).goLiveDate.toNumber(),
-      itemsAvailable: (data as any).itemsAvailable.toNumber(),
-    }),
-  );
-});
+//   log.info(
+//     'get_candy_machine_data finished',
+//     JSON.stringify({
+//       price: (data as any).price.toNumber(),
+//       goLiveDate: (data as any).goLiveDate.toNumber(),
+//       itemsAvailable: (data as any).itemsAvailable.toNumber(),
+//     }),
+//   );
+// });
 
 programCommand('sign')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
