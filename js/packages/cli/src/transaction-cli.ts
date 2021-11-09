@@ -13,20 +13,26 @@ if (!fs.existsSync(CACHE_PATH)) {
 
 log.setLevel(log.levels.INFO);
 
-programCommand('get_transaction_info').action(async (options, cmd) => {
-  const { env } = cmd.opts();
+programCommand('get_transaction_info')
+  .option(
+    '-tx, --tx_signature <string>',
+    'Transaction signature',
+    'none', //mainnet-beta, testnet, devnet
+  )
+  .action(async (options, cmd) => {
+    const { env, tx_signature } = cmd.opts();
 
-  const signature =
-    '5wHu1qwD7q5ifaN5nwdcDqNFo53GJqa7nLp2BeeEpcHCusb4GzARz4GjgzsEHMkBMgCJMGa6GSQ1VG96Exv8kt2W';
-  const solConnection = new web3.Connection(env);
+    // const signature =
+    //   '5wHu1qwD7q5ifaN5nwdcDqNFo53GJqa7nLp2BeeEpcHCusb4GzARz4GjgzsEHMkBMgCJMGa6GSQ1VG96Exv8kt2W';
+    const solConnection = new web3.Connection(env);
 
-  const transaction = await solConnection.getParsedConfirmedTransaction(
-    signature,
-    'confirmed',
-  );
+    const transaction = await solConnection.getParsedConfirmedTransaction(
+      tx_signature,
+      'confirmed',
+    );
 
-  console.log(JSON.stringify(transaction));
-});
+    console.log(JSON.stringify(transaction));
+  });
 
 function programCommand(name: string) {
   return program
