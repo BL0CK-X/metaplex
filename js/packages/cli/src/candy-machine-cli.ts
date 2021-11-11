@@ -34,6 +34,7 @@ import { mint } from './commands/mint';
 // import { getCandyMachineData } from './commands/getCandyMachineData';
 import { signMetadata } from './commands/sign';
 import { signAllMetadataFromCandyMachine } from './commands/signAll';
+// import { signAllMetadataFromCandyMachine, getAllNFTsMinted } from './commands/signAll';
 import log from 'loglevel';
 import { createMetadataFiles } from './helpers/metadata';
 import { createGenerativeArt } from './commands/createArt';
@@ -364,6 +365,83 @@ programCommand('get_candy_machine_config_id')
     );
   });
 
+programCommand('get_candy_machine_config_data')
+  .option('-fig, --candy-machine-config-address <string>')
+  .action(async (directory, cmd) => {
+    const { keypair, env, candyMachineConfigAddress } = cmd.opts();
+
+    const walletKeyPair = loadWalletKey(keypair);
+    const anchorProgram = await loadCandyProgram(walletKeyPair, env);
+
+    console.log('candyMachineConfigAddress....', candyMachineConfigAddress);
+    const candy_machine_config = await anchorProgram.account.config.fetch(
+      new PublicKey(candyMachineConfigAddress),
+    );
+    console.log('candyMachineConfigAddress!!!!');
+
+    log.info('authority: ', (candy_machine_config as any).authority.toBase58());
+    const authority = (candy_machine_config as any).authority.toString();
+    //@ts-ignore
+    log.info('symbol: ', (candy_machine_config as any).data.symbol.toString());
+    const symbol = (candy_machine_config as any).data.symbol.toString();
+    //@ts-ignore
+    log.info(
+      'sellerFeeBasisPoints: ',
+      (candy_machine_config as any).data.sellerFeeBasisPoints,
+    );
+    const seller_fee_basis_points = (candy_machine_config as any).data
+      .sellerFeeBasisPoints;
+    //@ts-ignore
+    log.info('creators: ');
+    //@ts-ignore
+    // (candy_machine_config as any).data.creators.map(c =>
+    //   log.info(c.address.toBase58(), 'at', c.share, '%'),
+    // ),
+    const creators = [];
+    (candy_machine_config as any).data.creators.map(c => {
+      creators.push({
+        address: c.address.toString(),
+        share: c.share,
+      });
+    });
+    //@ts-ignore
+    log.info(
+      'maxSupply: ',
+      (candy_machine_config as any).data.maxSupply.toNumber(),
+    );
+    const max_supply = (candy_machine_config as any).data.maxSupply.toNumber();
+    //@ts-ignore
+    log.info(
+      'retainAuthority: ',
+      (candy_machine_config as any).data.retainAuthority,
+    );
+    const retain_authority = (candy_machine_config as any).data.retainAuthority;
+    //@ts-ignore
+    log.info('isMutable: ', (candy_machine_config as any).data.isMutable);
+    const is_mutable = (candy_machine_config as any).data.isMutable;
+    //@ts-ignore
+    log.info(
+      'maxNumberOfLines: ',
+      (candy_machine_config as any).data.maxNumberOfLines,
+    );
+    const max_number_of_lines = (candy_machine_config as any).data
+      .maxNumberOfLines;
+
+    console.log(
+      'get_candy_machine_config_data finished',
+      JSON.stringify({
+        authority: authority,
+        symbol: symbol,
+        seller_fee_basis_points: seller_fee_basis_points,
+        creators: creators,
+        max_supply: max_supply,
+        retain_authority: retain_authority,
+        is_mutable: is_mutable,
+        max_number_of_lines: max_number_of_lines,
+      }),
+    );
+  });
+
 programCommand('get_candy_machine_data')
   .option('-i, --candy-machine-id <string>')
   .action(async (directory, cmd) => {
@@ -379,16 +457,70 @@ programCommand('get_candy_machine_data')
 
     const data = (machine as any).data;
 
+    console.log('datadatadatadatadatadata', data);
+
+    console.log(machine);
+    console.log((machine as any).itemsRedeemed);
+
+    const authority = (machine as any).authority.toString();
+    const wallet = (machine as any).wallet.toString();
+    const config = (machine as any).config.toBase58();
+
+    let token_mint = (machine as any).tokenMint;
+    if (token_mint !== null) {
+      token_mint = token_mint.toString();
+    }
+    const items_redeemed = (machine as any).itemsRedeemed.toNumber();
+    const bump = (machine as any).bump;
+
+    // const apple = (machine as any).apple;
+    // console.log("apple", apple);
+
     console.log(
       'get_candy_machine_data finished',
       JSON.stringify({
         uuid: (data as any).uuid,
         price: (data as any).price.toNumber(),
-        goLiveDate: (data as any).goLiveDate.toNumber(),
-        itemsAvailable: (data as any).itemsAvailable.toNumber(),
+        go_live_date: (data as any).goLiveDate.toNumber(),
+        items_available: (data as any).itemsAvailable.toNumber(),
+        config_address: config,
+        items_redeemed: items_redeemed,
+        authority: authority,
+        wallet: wallet,
+        token_mint: token_mint,
+        bump: bump,
       }),
     );
   });
+
+// programCommand('sign_all_test')
+//   .option('-i, --candy-machine-id <string>')
+//   .option('-d, --daemon', 'Run signing continuously', false)
+//   .action(async (directory, cmd) => {
+//     const { keypair, env, candyMachineId } = cmd.opts();
+//     // const batchSize = "1000";
+
+//     // const cacheContent = loadCache(cacheName, env);
+//     const walletKeyPair = loadWalletKey(keypair);
+//     const anchorProgram = await loadCandyProgram(walletKeyPair, env);
+//     // // const candyAddress = cacheContent.candyMachineAddress;
+
+//     // const batchSizeParsed = parseInt(batchSize);
+//     // if (!parseInt(batchSize)) {
+//     //   throw new Error('Batch size needs to be an integer!');
+//     // }
+
+//     // log.debug('Creator pubkey: ', walletKeyPair.publicKey.toBase58());
+//     // log.debug('Environment: ', env);
+//     // log.debug('Candy machine address: ', candyMachineId);
+//     // log.debug('Batch Size: ', batchSizeParsed);
+//     const nfts = await getAllNFTsMinted(
+//       anchorProgram.provider.connection,
+//       candyMachineId
+//     );
+//     // return nfts;
+//     //////////////////////////////////////////////////    NOT USED --- WE WROTE THIS IN PYTHON
+// });
 
 programCommand('verify_price')
   .option('-p, --price <string>')

@@ -67,6 +67,10 @@ async function findAndSignMetadata(
     candyMachineAddress,
     connection,
   );
+
+  console.log('metadataByCandyMachine', JSON.stringify(metadataByCandyMachine));
+  console.log('metadataByCandyMachine.length', metadataByCandyMachine.length);
+
   if (lastCount === metadataByCandyMachine.length) {
     log.debug(`Didn't find any new NFTs to sign - ${new Date()}`);
     return;
@@ -93,7 +97,44 @@ async function findAndSignMetadata(
   );
 }
 
+export async function getAllNFTsMinted(
+  connection: Connection,
+  candyMachineAddress: string,
+) {
+  const metadataByCandyMachine = await getAccountsByCreatorAddress(
+    candyMachineAddress,
+    connection,
+  );
+
+  // console.log("metadataByCandyMachine", JSON.stringify(metadataByCandyMachine));
+  // console.log("metadataByCandyMachine.length", metadataByCandyMachine.length);
+
+  // if (lastCount === metadataByCandyMachine.length) {
+  //   log.debug(`Didn't find any new NFTs to sign - ${new Date()}`);
+  //   return;
+  // }
+  // lastCount = metadataByCandyMachine.length;
+  // log.info(
+  //   `Found ${metadataByCandyMachine.length} nft's minted by candy machine ${candyMachineAddress}`,
+  // );
+  return metadataByCandyMachine;
+}
+
 async function getAccountsByCreatorAddress(creatorAddress, connection) {
+  const offset =
+    1 + // key
+    32 + // update auth
+    32 + // mint
+    4 + // name string length
+    MAX_NAME_LENGTH + // name
+    4 + // uri string length
+    MAX_URI_LENGTH + // uri*
+    4 + // symbol string length
+    MAX_SYMBOL_LENGTH + // symbol
+    2 + // seller fee basis points
+    1 + // whether or not there is a creators vec
+    4 + // creators vec length
+    0 * MAX_CREATOR_LEN;
   const metadataAccounts = await getProgramAccounts(
     connection,
     TOKEN_METADATA_PROGRAM_ID.toBase58(),
@@ -101,20 +142,7 @@ async function getAccountsByCreatorAddress(creatorAddress, connection) {
       filters: [
         {
           memcmp: {
-            offset:
-              1 + // key
-              32 + // update auth
-              32 + // mint
-              4 + // name string length
-              MAX_NAME_LENGTH + // name
-              4 + // uri string length
-              MAX_URI_LENGTH + // uri*
-              4 + // symbol string length
-              MAX_SYMBOL_LENGTH + // symbol
-              2 + // seller fee basis points
-              1 + // whether or not there is a creators vec
-              4 + // creators vec length
-              0 * MAX_CREATOR_LEN,
+            offset: offset,
             bytes: creatorAddress,
           },
         },
@@ -128,6 +156,7 @@ async function getAccountsByCreatorAddress(creatorAddress, connection) {
     const accountPubkey = e.pubkey;
     const store = [decoded, accountPubkey];
     decodedAccounts.push(store);
+    console.log(accountPubkey);
   }
   return decodedAccounts;
 }
