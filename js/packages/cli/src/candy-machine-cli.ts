@@ -365,17 +365,16 @@ programCommand('get_candy_machine_config_id')
     );
   });
 
-programCommand('get_candy_machine_config_data')
-  .option('-fig, --candy-machine-config-address <string>')
-  .action(async (directory, cmd) => {
-    const { keypair, env, candyMachineConfigAddress } = cmd.opts();
+programCommand('get_candy_machine_config_data').action(
+  async (directory, cmd) => {
+    const { keypair, env, configAddress } = cmd.opts();
 
     const walletKeyPair = loadWalletKey(keypair);
     const anchorProgram = await loadCandyProgram(walletKeyPair, env);
 
-    console.log('candyMachineConfigAddress....', candyMachineConfigAddress);
+    console.log('candyMachineConfigAddress....', configAddress);
     const candy_machine_config = await anchorProgram.account.config.fetch(
-      new PublicKey(candyMachineConfigAddress),
+      new PublicKey(configAddress),
     );
     console.log('candyMachineConfigAddress!!!!');
 
@@ -440,7 +439,8 @@ programCommand('get_candy_machine_config_data')
         max_number_of_lines: max_number_of_lines,
       }),
     );
-  });
+  },
+);
 
 programCommand('get_candy_machine_data')
   .option('-i, --candy-machine-id <string>')
